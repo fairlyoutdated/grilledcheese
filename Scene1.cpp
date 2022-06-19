@@ -34,12 +34,21 @@ float gravity = 0; // Gravity velocity
 
 int ground = 710;
 
+int ceiling = 0;
+
+int left = 0;
+int right = 1280;
+
 bool grounded = false;
 
 bool flying = false; // Checks if player is flying
 
-bool colmatch = false; // used for collision detection with platforms
+bool floor_colmatch = false; // used for collision detection with platforms
 
+bool ceiling_colmatch = false;
+
+bool left_colmatch = false;
+bool right_colmatch = false;
 
 void Scene1::Init(){
     bacteria = 0;
@@ -58,13 +67,21 @@ void Scene1::Init(){
 
     gravity = 0; // Gravity velocity
 
+    ceiling = 0;
+
     ground = 710; // Ground level
+
+    left = 0;
+    right = 1280;
 
     grounded = false; // Check if player is on the ground
 
     flying = false; // Checks if player is flying
 
-    colmatch = false; // used for collision detection with platforms
+    floor_colmatch = false; // used for collision detection with platforms
+
+    left_colmatch = false;
+    right_colmatch = false;
 }
 
 void Scene1::Display(){
@@ -115,25 +132,46 @@ void Scene1::Misc(){
     playery+=gravity;
 
     if(playery > 720) playery = 720; 
-    if(playery < 0) playery = 0;   
+    if(playery < ceiling) playery = ceiling;
+    if(playerx < left) playerx = left;
+    if(playerx > right) playerx = right;   
 
     /* level collisions */
     for(int y = 0; y < ly; y++){
         for(int x = 0; x < lx; x++){
             if(level[y*lx + x] == 1 && (int)playerx/80 == x && (int)(playery/80)+1 == y) {
                 ground = (y*80)-10;
-                colmatch = true;
+                floor_colmatch = true;
+            }
+            if(level[y*lx + x] == 1 && (int)playerx/80 == x && (int)(playery/80)-1 == y) {
+                ceiling = ((y+1)*80+10);
+                ceiling_colmatch = true;
             }
             if(level[y*lx + x] == 2 && (int)playerx/80 == x && (int)(playery/80) == y) {
                 level[y*lx + x] = 0;
                 bacteria++;
-                // colmatch = true;
+                // floor_colmatch = true;
+            }
+
+            if(level[y*lx + x] == 1 && (int)(playerx/80)-1 == x && (int)(playery/80) == y) {
+                left = ((x+1)*80)+10;
+                left_colmatch = true;
+            }
+            if(level[y*lx + x] == 1 && (int)(playerx/80)+1 == x && (int)(playery/80) == y) {
+                right = ((x)*80-10);
+                right_colmatch = true;
             }
         }
     }
-    if(!colmatch) ground = 710;
+    if(!floor_colmatch) ground = 710;
+    if(!ceiling_colmatch) ceiling = 0;
+    if(!left_colmatch) left = 0;
+    if(!right_colmatch) right = 1280;
 
-    colmatch = false;
+    floor_colmatch = false;
+    ceiling_colmatch = false;
+    left_colmatch = false;
+    right_colmatch = false;
 }
 
 void Scene1::Deinit(){
