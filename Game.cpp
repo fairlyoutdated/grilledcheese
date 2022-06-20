@@ -1,5 +1,5 @@
 #include "Game.h"
-#include "Scene1.h"
+#include "SoloLevel1.h"
 #include <vector>
 #include "MainMenu.h"
 
@@ -15,7 +15,7 @@ void GC_LoadScene(int m){
 
 void GC_InitSceneList(){
     SceneList.push_back(new MainMenu());
-    SceneList.push_back(new Scene1());
+    SceneList.push_back(new SoloLevel1());
 }
 
 void GC_Display(){

@@ -1,4 +1,4 @@
-#include "Scene1.h"
+#include "SoloLevel1.h"
 #include <raylib.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -7,6 +7,9 @@
 int bacteria = 0;
 
 int level[144]; // This is the level grid. 1=block 0=air.
+
+Texture2D grilledcheese;
+Texture2D brick;
 
 int origlevel[]= {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 
@@ -50,7 +53,7 @@ bool ceiling_colmatch = false;
 bool left_colmatch = false;
 bool right_colmatch = false;
 
-void Scene1::Init(){
+void SoloLevel1::Init(){
     bacteria = 0;
     memcpy(level, origlevel, sizeof origlevel);
      // This is the level grid. 1=block 0=air.
@@ -64,7 +67,8 @@ void Scene1::Init(){
     jetpackmax = 3;
 
     playerspeed = 150;
-
+    grilledcheese = LoadTexture("base/gc.png");
+    brick = LoadTexture("base/brick.png");
     gravity = 0; // Gravity velocity
 
     ceiling = 0;
@@ -84,7 +88,7 @@ void Scene1::Init(){
     right_colmatch = false;
 }
 
-void Scene1::Display(){
+void SoloLevel1::Display(){
     BeginDrawing();
     ClearBackground(BLACK);
     DrawText(TextFormat("Bacteria collected: %i", bacteria), 0, 0, 30, YELLOW);
@@ -95,28 +99,29 @@ void Scene1::Display(){
 
     for(int y = 0; y < ly; y++){
         for(int x = 0; x < lx; x++){
-            if(level[y*lx + x] == 1) DrawRectangle(x*80, y*80, 80, 80, GRAY); // Platforms
+            if(level[y*lx + x] == 1) DrawTexture(brick, x*80, y*80, WHITE); //DrawRectangle(x*80, y*80, 80, 80, GRAY); // Platforms
             if(level[y*lx + x] == 2) DrawRectangle(x*80, y*80, 80, 80, GREEN); // Bacteria
         }
     }
 
-    DrawCircle(playerx, playery, 30, WHITE);
+    //DrawCircle(playerx, playery, 32, WHITE);
+    DrawTexture(grilledcheese, playerx-32, playery-32, WHITE);
     EndDrawing();
 }
 
-void Scene1::Input(){
+void SoloLevel1::Input(){
     if(IsKeyDown(KEY_W) && jetpack < jetpackmax) jetpack += GetFrameTime();
     if((!IsKeyDown(KEY_W) || jetpack >= jetpackmax) && jetpack > 0) jetpack -= GetFrameTime();
     flying = IsKeyDown(KEY_W);
     //if(IsKeyDown(KEY_S)) playery++;
-    if(IsKeyDown(KEY_A)) playerx -= playerspeed * GetFrameTime();
-    if(IsKeyDown(KEY_D)) playerx += playerspeed * GetFrameTime();
+    if(IsKeyDown(KEY_A) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_LEFT)) playerx -= playerspeed * GetFrameTime();
+    if(IsKeyDown(KEY_D) || IsGamepadButtonDown(0, GAMEPAD_BUTTON_LEFT_FACE_RIGHT)) playerx += playerspeed * GetFrameTime();
     if(IsKeyPressed(KEY_ESCAPE)) GC_LoadScene(0);
 
     
 }
 
-void Scene1::Misc(){
+void SoloLevel1::Misc(){
     /* Player movement physics */
     playery-=jetpack;
 
@@ -140,11 +145,11 @@ void Scene1::Misc(){
     for(int y = 0; y < ly; y++){
         for(int x = 0; x < lx; x++){
             if(level[y*lx + x] == 1 && (int)playerx/80 == x && (int)(playery/80)+1 == y) {
-                ground = (y*80)-10;
+                ground = (y*80)-30;
                 floor_colmatch = true;
             }
             if(level[y*lx + x] == 1 && (int)playerx/80 == x && (int)(playery/80)-1 == y) {
-                ceiling = ((y+1)*80+10);
+                ceiling = ((y+1)*80+30);
                 ceiling_colmatch = true;
             }
             if(level[y*lx + x] == 2 && (int)playerx/80 == x && (int)(playery/80) == y) {
@@ -154,16 +159,16 @@ void Scene1::Misc(){
             }
 
             if(level[y*lx + x] == 1 && (int)(playerx/80)-1 == x && (int)(playery/80) == y) {
-                left = ((x+1)*80)+10;
+                left = ((x+1)*80)+30;
                 left_colmatch = true;
             }
             if(level[y*lx + x] == 1 && (int)(playerx/80)+1 == x && (int)(playery/80) == y) {
-                right = ((x)*80-10);
+                right = ((x)*80-30);
                 right_colmatch = true;
             }
         }
     }
-    if(!floor_colmatch) ground = 710;
+    if(!floor_colmatch) ground = 690;
     if(!ceiling_colmatch) ceiling = 0;
     if(!left_colmatch) left = 0;
     if(!right_colmatch) right = 1280;
@@ -174,6 +179,7 @@ void Scene1::Misc(){
     right_colmatch = false;
 }
 
-void Scene1::Deinit(){
-    // There is nothing to deinitialize.
+void SoloLevel1::Deinit(){
+    UnloadTexture(grilledcheese);
+    UnloadTexture(brick);
 }
